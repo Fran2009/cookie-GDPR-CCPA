@@ -29,8 +29,9 @@ git clone https://github.com/Fran2009/cookie-GDPR-CCPA.git
 
 ## Uso
 
-Para inicializar el módulo, simplemente llama a la función initCookieModal en tu JavaScript, pasando la configuración si fuera necesario.
-Ejemplo de html básico
+Para inicializar el módulo una vez añadido el js y el css, simplemente crea un div con el id="cookie-modal-container".
+
+Ejemplo de uso básico:
 
 ```bash
 <!DOCTYPE html>
@@ -51,6 +52,7 @@ Ejemplo de html básico
 ```
 
 ## Opciones de Configuración
+Se puede configurar tanto el idioma con el que debe iniciar el modal, los lenguajes que estarán disponobles o los distintos textos de cookies que deben aparecer
 
 1. language: Idioma por defecto al mostrar el modal. Valores posibles: 'es', 'en', 'fr'.
 ```bash
@@ -81,18 +83,35 @@ Ejemplo de html básico
 </script>
 ```
 
-## Personalización de Textos
 
-Los textos pueden ser configurados dinámicamente pasando un objeto texts al inicializar el módulo. Los textos que no se configuren usarán los valores por defecto.
-Ejemplo de personalización de textos
-
+Ejemplo de uso con todas las configuraciones:
 ```bash
-initCookieModal({
-    texts: {
-        functionalityCookiesTitle: true,
-        advertisingCookiesTitle: true
-    }
-});
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Centro de Preferencias de Cookies</title>
+    <link rel="stylesheet" href="cookie-modal.css">
+</head>
+<body>
+    <a href="#" id="open-cookie-modal">Abrir preferencias de cookies</a>
+    <!-- Contenedor del modal -->
+    <div id="cookie-modal-container"></div>
+
+    <script src="cookie-modal.js"></script>
+    <script>
+        initCookieModal({
+            language: 'es', // Idioma por defecto
+            availableLanguages: ['es', 'en', 'fr'], // Idiomas disponibles
+            texts: {
+                    strictCookiesTitle: true,
+                    functionalityCookiesTitle: true,
+            }
+        });
+    </script>
+</body>
+</html>
 ```
 
 ## Soporte para Idiomas
