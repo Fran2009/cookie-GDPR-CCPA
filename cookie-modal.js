@@ -137,17 +137,37 @@
             return languageNames[lang] || lang;
         }
 
-        // Función para crear cookies
+        // Función para leer cookies (con soporte para localStorage)
+        function getCookie(name) {
+            // Intentar leer de localStorage primero (más robusto para pruebas locales)
+            const localVal = localStorage.getItem(name);
+            if (localVal) return localVal;
+
+            const nameEQ = name + "=";
+            const ca = document.cookie.split(';');
+            for(let i=0;i < ca.length;i++) {
+                let c = ca[i];
+                while (c.charAt(0)==' ') c = c.substring(1,c.length);
+                if (c.indexOf(nameEQ) == 0) return c.substring(nameEQ.length,c.length);
+            }
+            return null;
+        }
+
+        // Función para crear cookies (y guardar en localStorage)
         function setCookie(name, value, days) {
+            // Guardar en localStorage
+            localStorage.setItem(name, value);
+
             const d = new Date();
             d.setTime(d.getTime() + (days * 24 * 60 * 60 * 1000));
             const expires = "expires=" + d.toUTCString();
-            document.cookie = name + "=" + value + ";" + expires + ";path=/";
+            document.cookie = name + "=" + value + ";" + expires + ";path=/;SameSite=Lax";
         }
 
         // Función para eliminar cookies
         function deleteCookie(name) {
-            document.cookie = name + "=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+            localStorage.removeItem(name);
+            document.cookie = name + "=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;SameSite=Lax";
         }
 
         // Función para actualizar los textos en el modal según el idioma
@@ -158,8 +178,6 @@
             document.querySelector('.cookie-body h3').textContent = finalTexts.privacyTitle || '';
             document.querySelector('.cookie-body p').textContent = finalTexts.privacyText || '';
             
-
-
             // Solo mostrar las secciones configuradas en el array 'texts'
             let sectionsHTML = '';
             if (finalTexts.strictCookiesTitle) {
@@ -180,7 +198,7 @@
                     <div class="toggle-content" id="functionality-cookies">
                         <p>${finalTexts.functionalityCookiesText}</p>
                         <div class="toggle">
-                            <input type="checkbox" id="functionality-cookies-toggle">
+                            <input type="checkbox" id="functionality-cookies-toggle" ${getCookie('functionalityCookies') ? 'checked' : ''}>
                             <label for="functionality-cookies-toggle"></label>
                         </div>
                     </div>
@@ -192,7 +210,7 @@
                     <div class="toggle-content" id="performance-cookies">
                         <p>${finalTexts.performanceCookiesText}</p>
                         <div class="toggle">
-                            <input type="checkbox" id="performance-cookies-toggle">
+                            <input type="checkbox" id="performance-cookies-toggle" ${getCookie('performanceCookies') ? 'checked' : ''}>
                             <label for="performance-cookies-toggle"></label>
                         </div>
                     </div>
@@ -204,7 +222,7 @@
                     <div class="toggle-content" id="advertising-cookies">
                         <p>${finalTexts.advertisingCookiesText}</p>
                         <div class="toggle">
-                            <input type="checkbox" id="advertising-cookies-toggle">
+                            <input type="checkbox" id="advertising-cookies-toggle" ${getCookie('advertisingCookies') ? 'checked' : ''}>
                             <label for="advertising-cookies-toggle"></label>
                         </div>
                     </div>
@@ -227,7 +245,7 @@
 
         // Estructura del modal
         const modalHTML = `
-        <div class="cookie-preferences-modal">
+        <div class="cookie-preferences-modal" style="display: none;">
             <div class="cookie-preferences">
                 <div class="cookie-header">
                     <h2></h2>
@@ -255,6 +273,11 @@
         updateTexts(currentLanguage);
         // Inicializar los toggles al cargar el modal
         initializeToggles();
+
+        // Comprobar si ya se han aceptado las cookies
+        if (!getCookie('strictCookies')) {
+            document.querySelector('.cookie-preferences-modal').style.display = 'flex';
+        }
 
         // Función para inicializar los toggles de las secciones
         function initializeToggles() {
@@ -313,6 +336,10 @@
             setCookie('functionalityCookies', 'enabled', 30);
             setCookie('performanceCookies', 'enabled', 30);
             setCookie('advertisingCookies', 'enabled', 30);
+
+            // Actualizar la interfaz para reflejar que están aceptadas
+            updateTexts(currentLanguage);
+            initializeToggles();
 
             // Ocultar el modal después de aceptar todas
             document.querySelector('.cookie-preferences-modal').style.display = 'none';
